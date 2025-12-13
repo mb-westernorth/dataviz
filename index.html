@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visualizador de Registros - MBON</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <title>Registro MBON</title>
     <style>
         * {
             margin: 0;
@@ -24,7 +22,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 850px;
             width: 100%;
             background: rgba(30, 40, 55, 0.85);
             backdrop-filter: blur(10px);
@@ -66,7 +64,7 @@
             animation: pulse-green 2s ease-in-out infinite;
         }
 
-        .status-dot.error {
+        .status-dot.disconnected {
             background: #e74c3c;
             animation: pulse-red 2s ease-in-out infinite;
         }
@@ -77,23 +75,39 @@
         }
 
         @keyframes pulse-green {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
-            50% { box-shadow: 0 0 0 6px rgba(46, 204, 113, 0); }
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 0 6px rgba(46, 204, 113, 0);
+            }
         }
 
         @keyframes pulse-red {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
-            50% { box-shadow: 0 0 0 6px rgba(231, 76, 60, 0); }
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 0 6px rgba(231, 76, 60, 0);
+            }
         }
 
         @keyframes pulse-orange {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(243, 156, 18, 0.7); }
-            50% { box-shadow: 0 0 0 6px rgba(243, 156, 18, 0); }
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(243, 156, 18, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 0 6px rgba(243, 156, 18, 0);
+            }
         }
 
         @keyframes pulse-gray {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
         }
 
         .status-text {
@@ -126,192 +140,116 @@
             margin-left: 19px;
         }
 
-        /* ==================== ESTADÍSTICAS COMPACTAS ==================== */
-        .stats-section {
-            margin: 20px 0;
-            padding: 15px;
-            background: rgba(30, 40, 55, 0.6);
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        .form-group {
+            margin-bottom: 16px;
         }
 
-        .stats-section h3 {
-            color: #64b5f6;
-            margin-bottom: 12px;
-            font-size: 14px;
-            font-weight: 600;
+        label {
             display: flex;
             align-items: center;
             gap: 8px;
-        }
-
-        .stats-section h3::before {
-            content: '📈';
+            margin-bottom: 8px;
+            font-weight: 400;
+            color: #64b5f6;
             font-size: 14px;
         }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-            gap: 10px;
+        .icon {
+            font-size: 16px;
         }
 
-        .stat-card {
-            background: rgba(30, 40, 55, 0.8);
-            padding: 12px 8px;
-            border-radius: 8px;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.2s ease;
+        input[type="text"],
+        input[type="tel"],
+        input[type="email"],
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 0.5px solid #7f8c8d;
+            border-radius: 10px;
+            font-size: 15px;
+            background: rgba(30, 40, 55, 0.9);
+            color: #ffffff;
+            transition: all 0.3s;
+            outline: none;
         }
 
-        .stat-card:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(100, 181, 246, 0.2);
-        }
-
-        .stat-number {
-            font-size: 18px;
-            font-weight: bold;
-            color: #64b5f6;
-            margin-bottom: 4px;
-        }
-
-        .stat-label {
-            font-size: 10px;
+        input::placeholder,
+        select option:first-child {
             color: #7f8c8d;
-            font-weight: 500;
         }
 
-        /* ==================== BOTÓN SOLO ACTUALIZAR ==================== */
-        .controls {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            align-items: center;
+        input:focus,
+        select:focus {
+            background: rgba(40, 50, 65, 1);
+            box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.3);
         }
 
-        .btn {
-            padding: 10px 16px;
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='%2364b5f6' d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 20px center;
+            padding-right: 50px;
+        }
+
+        select option {
+            background: #2c3e50;
+            color: #ffffff;
+            padding: 12px;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #9b59b6, #3498db);
+            color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 12px;
+            border-radius: 10px;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            white-space: nowrap;
-            background: linear-gradient(135deg, #3498db, #2980b9);
-            color: white;
-            box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+            margin-top: 8px;
+            box-shadow: 0 4px 15px rgba(155, 89, 182, 0.4);
         }
 
-        .btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        button[type="submit"]:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(155, 89, 182, 0.6);
         }
 
-        /* Nuevo botón PDF al final */
-        .btn-pdf {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            margin-top: 20px;
-            width: 100%;
-            max-width: 200px;
-            margin-left: auto;
-            margin-right: auto;
-            display: block;
-        }
-
-        .btn-pdf:hover {
-            background: linear-gradient(135deg, #c0392b, #a93226);
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
+        button[type="submit"]:disabled {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
             cursor: not-allowed;
-            transform: none !important;
+            transform: none;
+            box-shadow: none;
+            opacity: 0.8;
         }
 
-        /* ==================== TABLA ORIGINAL ==================== */
-        .table-section {
-            margin: 20px 0;
-            padding: 20px;
+        .form-disabled {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .form-disabled input,
+        .form-disabled select {
             background: rgba(30, 40, 55, 0.6);
-            border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-color: #5d6d7e;
+            color: #a6a6a6;
+            cursor: not-allowed;
         }
 
-        .table-section h3 {
-            color: #64b5f6;
-            margin-bottom: 15px;
-            font-size: 16px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .table-section h3::before {
-            content: '📋';
-            font-size: 16px;
-        }
-
-        .table-container {
-            overflow-x: auto;
-            border-radius: 10px;
-        }
-
-        .registros-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-            background: rgba(30, 40, 55, 0.8);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        .registros-table th {
-            background: rgba(52, 152, 219, 0.4);
-            color: #64b5f6;
-            padding: 12px 10px;
-            text-align: left;
-            font-weight: 600;
-            border-bottom: 2px solid rgba(100, 181, 246, 0.4);
-            white-space: nowrap;
-            font-size: 12px;
-        }
-
-        .registros-table td {
-            padding: 10px 10px;
-            color: #ecf0f1;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            white-space: nowrap;
-            font-size: 12px;
-        }
-
-        .registros-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .registros-table tr:hover {
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        /* ==================== MENSAJES ==================== */
         .loading {
             display: none;
             text-align: center;
-            padding: 15px;
+            padding: 12px;
             margin: 12px 0;
             background: rgba(52, 152, 219, 0.2);
-            border-radius: 8px;
+            border-radius: 10px;
             color: #64b5f6;
             font-weight: 500;
             border: 1px solid rgba(100, 181, 246, 0.3);
-            font-size: 12px;
         }
 
         .loading.show {
@@ -328,17 +266,16 @@
             display: none;
             padding: 12px;
             margin: 12px 0;
-            border-radius: 8px;
+            border-radius: 10px;
             font-weight: 500;
             text-align: center;
             animation: slideDown 0.3s ease-out;
-            font-size: 12px;
         }
 
         @keyframes slideDown {
             from {
                 opacity: 0;
-                transform: translateY(-8px);
+                transform: translateY(-10px);
             }
             to {
                 opacity: 1;
@@ -362,133 +299,154 @@
             border: 1px solid rgba(231, 76, 60, 0.5);
         }
 
+        .limit-message {
+            background: rgba(243, 156, 18, 0.2);
+            color: #f39c12;
+            border: 1px solid rgba(243, 156, 18, 0.5);
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .completed-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        /* ==================== ESTILOS PARA LA TABLA RESUMEN ==================== */
+        .resumen-section {
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(30, 40, 55, 0.6);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .resumen-section h3 {
+            color: #64b5f6;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .resumen-section h3::before {
+            content: '📊';
+            font-size: 18px;
+        }
+
+        .tabla-resumen {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .tabla-resumen th {
+            background: rgba(52, 152, 219, 0.3);
+            color: #64b5f6;
+            padding: 10px 8px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid rgba(100, 181, 246, 0.3);
+        }
+
+        .tabla-resumen td {
+            padding: 10px 8px;
+            color: #ecf0f1;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tabla-resumen tr:last-child td {
+            border-bottom: none;
+        }
+
+        .tabla-resumen tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
         .sin-registros {
             text-align: center;
             color: #7f8c8d;
-            padding: 30px;
+            padding: 20px;
             font-style: italic;
-            font-size: 12px;
         }
 
-        /* Contenedor para el botón PDF al final */
-        .pdf-container {
-            text-align: center;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        /* ==================== BOTÓN MODIFICADO - SOLO REDIRECCIÓN ==================== */
+        .view-all-button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+            text-decoration: none;
         }
 
-        /* ==================== RESPONSIVE ==================== */
+        .view-all-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(52, 152, 219, 0.4);
+            background: linear-gradient(135deg, #2980b9, #2471a3);
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 20px;
             }
 
-            .header h1 {
-                font-size: 22px;
-            }
-
-            .connection-status {
-                position: relative;
-                justify-content: center;
-                margin-top: 8px;
-                margin-bottom: 10px;
-            }
-
-            .stats-grid {
-                grid-template-columns: repeat(4, 1fr);
-                gap: 8px;
-            }
-
-            .stat-card {
-                padding: 10px 6px;
-            }
-
-            .stat-number {
-                font-size: 16px;
-            }
-
-            .stat-label {
-                font-size: 9px;
-            }
-
-            .controls {
-                justify-content: center;
-                flex-wrap: wrap;
-            }
-
-            .btn {
-                flex: 1;
-                min-width: 120px;
-                padding: 8px 12px;
+            .tabla-resumen {
                 font-size: 11px;
             }
 
-            .btn-pdf {
-                max-width: 100%;
-            }
-
-            .registros-table {
-                font-size: 11px;
-            }
-
-            .registros-table th,
-            .registros-table td {
-                padding: 8px 6px;
-                font-size: 11px;
+            .tabla-resumen th,
+            .tabla-resumen td {
+                padding: 8px 5px;
             }
         }
 
-        @media (max-width: 480px) {
+        @media (max-width: 600px) {
             .container {
                 padding: 15px;
                 border-radius: 15px;
             }
 
             .header h1 {
-                font-size: 20px;
+                font-size: 26px;
             }
 
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
+            input, select, button {
+                padding: 14px 16px;
+                font-size: 15px;
             }
 
-            .controls {
-                flex-direction: column;
+            .tabla-resumen {
+                font-size: 11px;
             }
 
-            .btn {
-                width: 100%;
-            }
-
-            .registros-table {
-                font-size: 10px;
-            }
-
-            .registros-table th,
-            .registros-table td {
+            .tabla-resumen th,
+            .tabla-resumen td {
                 padding: 6px 4px;
-                font-size: 10px;
             }
-        }
-
-        /* Scrollbar styling */
-        .table-container::-webkit-scrollbar {
-            height: 6px;
-        }
-
-        .table-container::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-        }
-
-        .table-container::-webkit-scrollbar-thumb {
-            background: #64b5f6;
-            border-radius: 3px;
-        }
-
-        .table-container::-webkit-scrollbar-thumb:hover {
-            background: #3498db;
         }
     </style>
 </head>
@@ -497,470 +455,413 @@
         <div class="header">
             <div class="connection-status">
                 <div class="status-dot" id="statusDot"></div>
-                <span class="status-text" id="statusText">Conectando...</span>
+                <span class="status-text" id="statusText">Verificando...</span>
             </div>
-            <h1>Visualizador de Registros</h1>
+            <h1>Sistema de Registro</h1>
             <p>Secretaría de Iglesias MBON</p>
         </div>
-
-        <!-- Sección de Estadísticas Compactas -->
-        <div class="stats-section">
-            <h3>Estadísticas</h3>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-number" id="totalRegistros">0</div>
-                    <div class="stat-label">Total</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="secretariosCount">0</div>
-                    <div class="stat-label">Secretarios</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="pastoresCount">0</div>
-                    <div class="stat-label">Pastores</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="asociadosCount">0</div>
-                    <div class="stat-label">Asociados</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="visitasCount">0</div>
-                    <div class="stat-label">Visitas</div>
-                </div>
+        
+        <!-- Mensaje de límite (solo se muestra si ya está registrado) -->
+        <div class="limit-message" id="limitMessage" style="display: none;">
+            ⚠️ <strong>LÍMITE DE REGISTRO ALCANZADO</strong><br>
+            <small>Solo puedes realizar un registro por dispositivo.</small>
+        </div>
+        
+        <form id="attendanceForm">
+            <div class="form-group">
+                <label>
+                    <span class="icon">👤</span>
+                    Nombre Completo
+                </label>
+                <input 
+                    type="text" 
+                    name="nombre" 
+                    placeholder="Ej: Juan Pérez"
+                    required
+                >
             </div>
-        </div>
+            
+            <div class="form-group">
+                <label>
+                    <span class="icon">📍</span>
+                    Distrito
+                </label>
+                <input 
+                    type="text" 
+                    name="distrito" 
+                    placeholder="Ej: Distrito Norte"
+                    required
+                >
+            </div>
+            
+            <div class="form-group">
+                <label>
+                    <span class="icon">⛪</span>
+                    Iglesia
+                </label>
+                <input 
+                    type="text" 
+                    name="iglesia" 
+                    placeholder="Ej: Iglesia Central"
+                    required
+                >
+            </div>
+            
+            <div class="form-group">
+                <label>
+                    <span class="icon">📱</span>
+                    Celular
+                </label>
+                <input 
+                    type="tel" 
+                    name="celular" 
+                    placeholder="Ej: 1234567890"
+                    pattern="[0-9]{7,15}"
+                    required
+                >
+            </div>
 
-        <!-- Solo botón Actualizar arriba -->
-        <div class="controls">
-            <button class="btn" onclick="cargarRegistros()">
-                <span>🔄</span>
-                Actualizar
+            <div class="form-group">
+                <label>
+                    <span class="icon">📧</span>
+                    Correo Electrónico
+                </label>
+                <input 
+                    type="email" 
+                    name="correo" 
+                    placeholder="ejemplo@correo.com"
+                    required
+                >
+            </div>
+            
+            <div class="form-group">
+                <label>
+                    <span class="icon">🎯</span>
+                    Cargo
+                </label>
+                <select name="cargo" required>
+                    <option value="">Selecciona un cargo</option>
+                    <option value="Secretario(a)">Secretario(a)</option>
+                    <option value="Secretario(a) Asociado(a)">Secretario(a) Asociado(a)</option>
+                    <option value="Secretario(a) Nuevo">Secretario(a) Nuevo</option>
+                    <option value="Secretario(a) Asociado(a) Nuevo">Secretario(a) Asociado(a) Nuevo</option>
+                    <option value="Pastor">Pastor</option>
+                    <option value="Visita">Visita</option>
+                </select>
+            </div>
+            
+            <button type="submit" id="submitBtn">
+                Registrar Asistencia
             </button>
-        </div>
-
-        <!-- Sección de Tabla (MANTENIENDO ESTILO ORIGINAL) -->
-        <div class="table-section">
-            <h3>Registros de Asistencia</h3>
-            <div class="table-container">
-                <table class="registros-table" id="registrosTable">
+        </form>
+        
+        <!-- Sección de Resumen con Botón Fijo -->
+        <div class="resumen-section">
+            <h3>Tu Registro</h3>
+            <div id="resumenContent">
+                <div class="sin-registros" id="sinRegistro">
+                    📝 Aún no has completado tu registro
+                </div>
+                <table class="tabla-resumen" id="tablaResumen" style="display: none;">
                     <thead>
                         <tr>
-                            <th>#</th>
                             <th>Nombre</th>
                             <th>Distrito</th>
                             <th>Iglesia</th>
-                            <th>Celular</th>
-                            <th>Fecha</th>
                             <th>Cargo</th>
+                            <th>Fecha</th>
                         </tr>
                     </thead>
-                    <tbody id="registrosBody">
-                        <!-- Los datos se cargarán aquí -->
+                    <tbody id="resumenBody">
+                        <!-- Datos se llenan dinámicamente -->
                     </tbody>
                 </table>
-                <div class="sin-registros" id="sinRegistros">
-                    📝 Cargando base de datos...
-                </div>
             </div>
+            
+            <!-- Botón MODIFICADO - Solo redirección a datos.html -->
+            <a href="datos.html" class="view-all-button" id="viewAllButton">
+                👥 Ver Todos los Registros
+            </a>
         </div>
-
-        <!-- Botón Exportar PDF al final -->
-        <div class="pdf-container">
-            <button class="btn btn-pdf" onclick="exportarPDF()" id="btnPDF" disabled>
-                <span>📄</span>
-                Exportar PDF
-            </button>
-        </div>
-
+        
         <div class="loading" id="loadingIndicator">
-            ⏳ Conectando con Google Sheets...
+            ⏳ Enviando datos...
         </div>
-
+        
         <div class="message" id="message"></div>
     </div>
 
     <script>
-        // ⚠️ REEMPLAZA CON TU URL DEL VISUALIZADOR
-        const URL_VISUALIZADOR = 'https://script.google.com/macros/s/AKfycbyJsdXI7rdr_rXZi_aCWR5I0kwOL_skrwmc22vlR7l9k21DTJxaduZWAikDvE_gOM4/exec';
+        // ⚠️ CONFIGURACIÓN - REEMPLAZA CON TU URL
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzTaLLm66buVm_ZTfZMWrIbjU23Yb3SScmKldWmYloTwtmAHnPhMljNV0KIjXOaGDF6/exec';
         
+        // ==================== SISTEMA DE 1 REGISTRO POR DISPOSITIVO ====================
+        const REGISTRO_KEY = 'mbon_registro_evento_2024';
+
         // Elementos del DOM
-        const registrosBody = document.getElementById('registrosBody');
-        const loadingIndicator = document.getElementById('loadingIndicator');
+        const form = document.getElementById('attendanceForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const loading = document.getElementById('loadingIndicator');
         const message = document.getElementById('message');
         const statusDot = document.getElementById('statusDot');
         const statusText = document.getElementById('statusText');
-        const sinRegistros = document.getElementById('sinRegistros');
-        const totalRegistros = document.getElementById('totalRegistros');
-        const secretariosCount = document.getElementById('secretariosCount');
-        const pastoresCount = document.getElementById('pastoresCount');
-        const asociadosCount = document.getElementById('asociadosCount');
-        const visitasCount = document.getElementById('visitasCount');
-        const btnPDF = document.getElementById('btnPDF');
+        const tablaResumen = document.getElementById('tablaResumen');
+        const resumenBody = document.getElementById('resumenBody');
+        const sinRegistro = document.getElementById('sinRegistro');
+        const limitMessage = document.getElementById('limitMessage');
 
-        // Variable global para almacenar los registros actuales
-        let registrosActuales = [];
+        // Variables para el estado de conexión
+        let connectionStatus = 'checking';
+        let checkInterval;
+
+        // ==================== FUNCIONES DE REGISTRO ÚNICO ====================
 
         /**
-         * Cargar registros desde Google Sheets
+         * Verificar si ya se registró desde este dispositivo
          */
-        async function cargarRegistros() {
-            try {
-                setLoadingState(true);
-                limpiarMensajes();
-                actualizarEstadoConexion('checking', 'Conectando...');
+        function yaSeRegistro() {
+            return localStorage.getItem(REGISTRO_KEY) === 'true';
+        }
 
-                const response = await fetch(URL_VISUALIZADOR);
-                
-                if (!response.ok) {
-                    throw new Error(`Error HTTP: ${response.status}`);
+        /**
+         * Guardar registro exitoso en storage
+         */
+        function guardarRegistroExitoso(datos) {
+            const timestamp = new Date().toISOString();
+            
+            localStorage.setItem(REGISTRO_KEY, 'true');
+            localStorage.setItem(REGISTRO_KEY + '_fecha', timestamp);
+            localStorage.setItem(REGISTRO_KEY + '_datos', JSON.stringify({
+                ...datos,
+                fecha: timestamp,
+                dispositivo: navigator.userAgent.substring(0, 100)
+            }));
+            
+            // Actualizar resumen local
+            actualizarResumenLocal(datos, timestamp);
+        }
+
+        /**
+         * Actualizar la tabla de resumen con los datos locales
+         */
+        function actualizarResumenLocal(datos, fecha) {
+            const fechaLegible = new Date(fecha).toLocaleDateString('es-ES', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            sinRegistro.style.display = 'none';
+            tablaResumen.style.display = 'table';
+            
+            resumenBody.innerHTML = `
+                <tr>
+                    <td>${datos.nombre}</td>
+                    <td>${datos.distrito}</td>
+                    <td>${datos.iglesia}</td>
+                    <td>${datos.cargo}</td>
+                    <td>${fechaLegible}</td>
+                </tr>
+            `;
+        }
+
+        /**
+         * Cargar resumen desde localStorage
+         */
+        function cargarResumenLocal() {
+            if (yaSeRegistro()) {
+                const datosGuardados = localStorage.getItem(REGISTRO_KEY + '_datos');
+                if (datosGuardados) {
+                    const datos = JSON.parse(datosGuardados);
+                    actualizarResumenLocal(datos, datos.fecha);
                 }
-                
-                const resultado = await response.json();
-                
-                if (resultado.status === 'success') {
-                    registrosActuales = resultado.data; // Guardar para el PDF
-                    mostrarRegistros(resultado.data);
-                    actualizarEstadisticas(resultado.data);
-                    actualizarEstadoConexion('connected', `${resultado.total} registros`);
-                    mostrarMensaje(`✅ ${resultado.message}`, 'success');
-                    
-                    // Habilitar botón PDF si hay registros
-                    if (resultado.data.length > 0) {
-                        btnPDF.disabled = false;
-                    } else {
-                        btnPDF.disabled = true;
-                    }
-                } else {
-                    throw new Error(resultado.message);
-                }
-                
-            } catch (error) {
-                console.error('Error:', error);
-                actualizarEstadoConexion('error', 'Error de conexión');
-                mostrarMensaje(`❌ Error: ${error.message}`, 'error');
-                mostrarRegistros([]);
-                btnPDF.disabled = true;
-                registrosActuales = [];
-            } finally {
-                setLoadingState(false);
             }
         }
 
         /**
-         * Mostrar registros en la tabla (ESTILO ORIGINAL)
+         * Deshabilitar formulario y mostrar mensaje de límite
          */
-        function mostrarRegistros(registros) {
-            if (!registros || registros.length === 0) {
-                sinRegistros.style.display = 'block';
-                sinRegistros.textContent = '📝 No hay registros en el sistema';
-                registrosBody.innerHTML = '';
-                btnPDF.disabled = true;
+        function mostrarMensajeLimite() {
+            if (yaSeRegistro()) {
+                // Mostrar mensaje de límite
+                limitMessage.style.display = 'block';
+                
+                // Deshabilitar formulario
+                form.classList.add('form-disabled');
+                const elementos = form.querySelectorAll('input, select');
+                elementos.forEach(elemento => {
+                    elemento.disabled = true;
+                });
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '✅ Registro Completado';
+                submitBtn.style.background = 'linear-gradient(135deg, #27ae60, #2ecc71)';
+                
+                showMessage(
+                    `🎉 <strong>¡Registro Completado!</strong><br>
+                    <small>Tu información ha sido registrada exitosamente.</small><br>
+                    <small><strong>Nota:</strong> Solo se permite un registro por dispositivo.</small>`, 
+                    'success'
+                );
+                
+                return true;
+            }
+            return false;
+        }
+
+        // ==================== FUNCIONES DE CONEXIÓN ====================
+
+        async function checkConnection() {
+            if (APPS_SCRIPT_URL === 'TU_URL_AQUI') {
+                updateConnectionStatus('disconnected', 'Sin configurar');
                 return;
             }
 
-            sinRegistros.style.display = 'none';
-            
-            registrosBody.innerHTML = registros.map((registro, index) => `
-                <tr>
-                    <td><strong>${index + 1}</strong></td>
-                    <td><strong>${escapeHtml(registro.nombre || 'Sin nombre')}</strong></td>
-                    <td>${escapeHtml(registro.distrito || 'Sin distrito')}</td>
-                    <td>${escapeHtml(registro.iglesia || 'Sin iglesia')}</td>
-                    <td>${escapeHtml(registro.celular || 'Sin celular')}</td>
-                    <td style="font-size: 11px; color: #7f8c8d;">${formatearFecha(registro.fecha)}</td>
-                    <td><span style="color: #64b5f6; font-weight: 500;">${escapeHtml(registro.cargo || 'Sin cargo')}</span></td>
-                </tr>
-            `).join('');
-        }
-
-        /**
-         * Exportar tabla a PDF (SOLUCIÓN CON jsPDF-AUTOTABLE)
-         */
-        /**
- * Exportar tabla a PDF CON AJUSTE AUTOMÁTICO EN TODAS LAS COLUMNAS
- */
-function exportarPDF() {
-    try {
-        if (registrosActuales.length === 0) {
-            mostrarMensaje('❌ No hay datos para exportar', 'error');
-            return;
-        }
-
-        mostrarMensaje('⏳ Generando PDF...', 'success');
-        const btnOriginalHTML = btnPDF.innerHTML;
-        btnPDF.disabled = true;
-        btnPDF.innerHTML = '<span>⏳</span> Generando...';
-
-        // Usar jsPDF con autoTable
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('l', 'pt', 'a4');
-
-        // Fecha actual formateada
-        const fechaActual = new Date().toLocaleDateString('es-ES', {
-            day: '2-digit',
-            month: 'long',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-
-        // Título
-        doc.setFontSize(20);
-        doc.setTextColor(52, 152, 219);
-        doc.text('REGISTROS DE ASISTENCIA - MBON', 40, 40);
-        
-        doc.setFontSize(11);
-        doc.setTextColor(100, 100, 100);
-        doc.text('Secretaría de Iglesias MBON', 40, 60);
-        doc.text(`Generado: ${fechaActual}`, 40, 75);
-        
-        // Estadísticas
-        doc.setFontSize(11);
-        doc.setTextColor(46, 204, 113);
-        doc.text('RESUMEN ESTADÍSTICO:', 40, 95);
-        
-        doc.setFontSize(10);
-        doc.setTextColor(0, 0, 0);
-        const estadisticas = [
-            `• Total: ${totalRegistros.textContent}`,
-            `• Secretarios: ${secretariosCount.textContent}`,
-            `• Pastores: ${pastoresCount.textContent}`,
-            `• Asociados: ${asociadosCount.textContent}`,
-            `• Visitas: ${visitasCount.textContent}`
-        ];
-        
-        estadisticas.forEach((est, i) => {
-            doc.text(est, 40 + (i % 3) * 180, 110 + Math.floor(i / 3) * 15);
-        });
-
-        // Preparar datos para la tabla
-        const headers = [['#', 'Nombre', 'Distrito', 'Iglesia', 'Celular', 'Fecha', 'Cargo']];
-        
-        const data = registrosActuales.map((registro, index) => [
-            (index + 1).toString(),
-            registro.nombre || 'Sin nombre',
-            registro.distrito || 'Sin distrito',
-            registro.iglesia || 'Sin iglesia',
-            registro.celular || 'Sin celular',
-            formatearFechaPDF(registro.fecha),
-            registro.cargo || 'Sin cargo'
-        ]);
-
-        // Configuración de la tabla CON AJUSTE AUTOMÁTICO PARA TODAS LAS COLUMNAS
-        doc.autoTable({
-            head: headers,
-            body: data,
-            startY: 140,
-            theme: 'grid',
-            styles: {
-                fontSize: 9,
-                cellPadding: 6, // Más padding para mejor legibilidad
-                overflow: 'linebreak', // AJUSTE DE TEXTO AUTOMÁTICO
-                lineColor: [200, 200, 200],
-                lineWidth: 0.1,
-                minCellHeight: 12 // Altura mínima para todas las celdas
-            },
-            headStyles: {
-                fillColor: [52, 152, 219],
-                textColor: [255, 255, 255],
-                fontStyle: 'bold',
-                fontSize: 10,
-                cellPadding: 6
-            },
-            // ANCHOS OPTIMIZADOS PARA CADA COLUMNA
-            columnStyles: {
-                0: { cellWidth: 'auto', halign: 'center', minCellWidth: 25 },  // # - Ancho automático
-                1: { cellWidth: 'auto', halign: 'left', minCellWidth: 100 },   // Nombre
-                2: { cellWidth: 'auto', halign: 'left', minCellWidth: 80 },    // Distrito
-                3: { cellWidth: 'auto', halign: 'left', minCellWidth: 90 },    // Iglesia
-                4: { cellWidth: 'auto', halign: 'left', minCellWidth: 85 },    // Celular
-                5: { cellWidth: 'auto', halign: 'center', minCellWidth: 70 },  // Fecha
-                6: { cellWidth: 'auto', halign: 'left', minCellWidth: 120 }    // CARGO - Más ancho
-            },
-            didParseCell: function(data) {
-                // Asegurar altura mínima para todas las celdas
-                data.cell.styles.minCellHeight = 12;
-                
-                // Si es la columna de Cargo (6) o Nombre (1), dar más espacio
-                if (data.column.index === 6 || data.column.index === 1) {
-                    data.cell.styles.minCellHeight = 15;
-                }
-                
-                // Si el texto es muy largo, ajustar automáticamente
-                if (data.cell.text && data.cell.text.length > 30) {
-                    data.cell.styles.fontSize = 8; // Reducir fuente para texto largo
-                }
-            },
-            // Ajustar automáticamente el ancho de columnas
-            tableWidth: 'auto',
-            margin: { top: 140, right: 40, bottom: 40, left: 40 },
-            // Configuración para paginación
-            pageBreak: 'auto',
-            showHead: 'firstPage',
-            // Forzar que se ajuste al ancho de página
-            tableLineWidth: 0
-        });
-
-        // Número de páginas
-        const totalPages = doc.internal.getNumberOfPages();
-        for (let i = 1; i <= totalPages; i++) {
-            doc.setPage(i);
-            doc.setFontSize(8);
-            doc.setTextColor(100, 100, 100);
-            doc.text(
-                `Página ${i} de ${totalPages}`,
-                doc.internal.pageSize.width - 60,
-                doc.internal.pageSize.height - 20
-            );
-        }
-
-        // Guardar el PDF
-        const nombreArchivo = `registros-mbon-${new Date().toISOString().split('T')[0]}.pdf`;
-        doc.save(nombreArchivo);
-
-        mostrarMensaje('✅ PDF generado correctamente', 'success');
-        
-        // Restaurar botón
-        setTimeout(() => {
-            btnPDF.disabled = false;
-            btnPDF.innerHTML = btnOriginalHTML;
-        }, 1000);
-
-    } catch (error) {
-        console.error('Error generando PDF:', error);
-        mostrarMensaje('❌ Error al generar PDF: ' + error.message, 'error');
-        btnPDF.disabled = false;
-        btnPDF.innerHTML = '<span>📄</span> Exportar PDF';
-    }
-}
-
-        /**
-         * Formatear fecha para PDF
-         */
-        function formatearFechaPDF(fechaStr) {
-            if (!fechaStr || fechaStr === 'Sin fecha') return 'No especificada';
-            
             try {
-                const fecha = new Date(fechaStr);
-                if (isNaN(fecha.getTime())) return fechaStr;
-                
-                return fecha.toLocaleDateString('es-ES', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: '2-digit'
+                statusDot.className = 'status-dot checking';
+                statusText.textContent = 'Verificando...';
+
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'GET',
+                    mode: 'no-cors',
+                    signal: controller.signal
                 });
-            } catch (e) {
-                return fechaStr;
+
+                clearTimeout(timeoutId);
+                updateConnectionStatus('connected', 'Conectado');
+                
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    updateConnectionStatus('disconnected', 'Tiempo agotado');
+                } else {
+                    updateConnectionStatus('disconnected', 'Sin conexión');
+                }
             }
         }
 
-        /**
-         * Actualizar estadísticas
-         */
-        function actualizarEstadisticas(registros) {
-            let secretarios = 0;
-            let pastores = 0;
-            let asociados = 0;
-            let visitas = 0;
-
-            registros.forEach(registro => {
-                const cargo = (registro.cargo || '').toLowerCase().trim();
-                
-                if (cargo.includes('secretario') && cargo.includes('asociado')) {
-                    asociados++;
-                } else if (cargo.includes('secretario')) {
-                    secretarios++;
-                } else if (cargo.includes('pastor')) {
-                    pastores++;
-                } else if (cargo.includes('visita')) {
-                    visitas++;
-                }
-            });
-
-            totalRegistros.textContent = registros.length;
-            secretariosCount.textContent = secretarios;
-            pastoresCount.textContent = pastores;
-            asociadosCount.textContent = asociados;
-            visitasCount.textContent = visitas;
+        function updateConnectionStatus(status, text) {
+            connectionStatus = status;
+            statusDot.className = `status-dot ${status}`;
+            statusText.textContent = text;
         }
 
-        /**
-         * Formatear fecha para mostrar
-         */
-        function formatearFecha(fechaStr) {
-            if (!fechaStr || fechaStr === 'Sin fecha') return 'No especificada';
+        function startConnectionMonitoring() {
+            checkConnection();
+            checkInterval = setInterval(checkConnection, 30000);
+        }
+
+        // ==================== MANEJO DEL FORMULARIO ====================
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
             
-            try {
-                const fecha = new Date(fechaStr);
-                if (isNaN(fecha.getTime())) return fechaStr;
-                
-                return fecha.toLocaleDateString('es-ES', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-            } catch (e) {
-                return fechaStr;
+            if (yaSeRegistro()) {
+                showMessage('⚠️ <strong>LÍMITE DE REGISTRO ALCANZADO</strong><br><small>Solo puedes realizar un registro por dispositivo.</small>', 'error');
+                mostrarMensajeLimite();
+                return;
             }
-        }
+            
+            if (connectionStatus === 'disconnected') {
+                showMessage('⚠️ Sin conexión al servidor.', 'error');
+                return;
+            }
+            
+            if (!form.checkValidity()) {
+                showMessage('Por favor, completa todos los campos obligatorios', 'error');
+                return;
+            }
 
-        /**
-         * Mostrar/ocultar estado de carga
-         */
+            setLoadingState(true);
+
+            try {
+                const formData = new FormData(form);
+                const datos = {};
+                formData.forEach((value, key) => {
+                    datos[key] = value;
+                });
+                
+                console.log('📤 Enviando datos:', datos);
+                
+                const params = new URLSearchParams(datos);
+                const urlConParams = `${APPS_SCRIPT_URL}?${params.toString()}`;
+                
+                const response = await fetch(urlConParams, {
+                    method: 'GET',
+                    mode: 'no-cors',
+                    redirect: 'follow'
+                });
+
+                console.log('✅ Datos enviados correctamente');
+                
+                guardarRegistroExitoso(datos);
+                updateConnectionStatus('connected', 'Conectado');
+                
+                showMessage('✅ ¡Registro completado exitosamente!<br><small>Tu información ha sido guardada correctamente.</small>', 'success');
+                
+                setTimeout(() => {
+                    mostrarMensajeLimite();
+                }, 2000);
+                
+                message.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            } catch (error) {
+                console.error('❌ Error:', error);
+                updateConnectionStatus('disconnected', 'Error de envío');
+                showMessage('❌ Error: ' + error.message, 'error');
+            } finally {
+                setLoadingState(false);
+                setTimeout(checkConnection, 2000);
+            }
+        });
+
         function setLoadingState(isLoading) {
+            submitBtn.disabled = isLoading;
             if (isLoading) {
-                loadingIndicator.classList.add('show');
+                loading.classList.add('show');
                 message.classList.remove('show');
+                submitBtn.textContent = '⏳ Enviando...';
             } else {
-                loadingIndicator.classList.remove('show');
+                loading.classList.remove('show');
+                submitBtn.textContent = 'Registrar Asistencia';
             }
         }
 
-        /**
-         * Mostrar mensajes
-         */
-        function mostrarMensaje(text, type) {
+        function showMessage(text, type) {
             message.innerHTML = text;
             message.className = `message ${type} show`;
             if (type === 'success') {
                 setTimeout(() => {
                     message.classList.remove('show');
-                }, 4000);
+                }, 5000);
             }
         }
 
-        /**
-         * Limpiar mensajes
-         */
-        function limpiarMensajes() {
-            message.classList.remove('show');
-        }
+        // ==================== INICIALIZACIÓN ====================
 
-        /**
-         * Actualizar estado de conexión
-         */
-        function actualizarEstadoConexion(status, text) {
-            statusDot.className = `status-dot ${status}`;
-            statusText.textContent = text;
-        }
-
-        /**
-         * Escapar HTML para seguridad
-         */
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        // Inicializar
         document.addEventListener('DOMContentLoaded', function() {
-            cargarRegistros();
-            
-            // Actualizar automáticamente cada 30 segundos
-            setInterval(cargarRegistros, 30000);
+            startConnectionMonitoring();
+            cargarResumenLocal();
+            setTimeout(() => {
+                mostrarMensajeLimite();
+            }, 1000);
+        });
+
+        // Validación del celular
+        document.querySelector('input[name="celular"]').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+
+        // Prevenir envío con Enter
+        form.querySelectorAll('input').forEach(input => {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                }
+            });
         });
     </script>
 </body>
