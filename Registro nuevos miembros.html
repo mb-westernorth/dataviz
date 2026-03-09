@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro MBON</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(180deg, #3d5a80 0%, #2e4a6a 100%);
+            min-height: 100vh;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 850px;
+            width: 100%;
+            background: rgba(30, 40, 55, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .header {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .connection-status {
+            position: absolute;
+            top: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: rgba(30, 40, 55, 0.9);
+            border-radius: 20px;
+            font-size: 12px;
+            border: 0.5px solid #7f8c8d;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #95a5a6;
+            animation: pulse-gray 2s ease-in-out infinite;
+        }
+
+        .status-dot.connected {
+            background: #2ecc71;
+            animation: pulse-green 2s ease-in-out infinite;
+        }
+
+        .status-dot.disconnected {
+            background: #e74c3c;
+            animation: pulse-red 2s ease-in-out infinite;
+        }
+
+        .status-dot.checking {
+            background: #f39c12;
+            animation: pulse-orange 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse-green {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 0 6px rgba(46, 204, 113, 0);
+            }
+        }
+
+        @keyframes pulse-red {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 0 6px rgba(231, 76, 60, 0);
+            }
+        }
+
+        @keyframes pulse-orange {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(243, 156, 18, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 0 6px rgba(243, 156, 18, 0);
+            }
+        }
+
+        @keyframes pulse-gray {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .status-text {
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .header h1 {
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 300;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 6px;
+        }
+
+        .header h1::before {
+            content: '';
+            width: 4px;
+            height: 26px;
+            background: linear-gradient(180deg, #9b59b6, #3498db);
+            border-radius: 2px;
+        }
+
+        .header p {
+            color: #64b5f6;
+            font-size: 14px;
+            font-weight: 400;
+            margin-left: 19px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-weight: 400;
+            color: #64b5f6;
+            font-size: 14px;
+        }
+
+        .icon {
+            font-size: 16px;
+        }
+
+        input[type="text"],
+        input[type="tel"],
+        input[type="email"],
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 0.5px solid #7f8c8d;
+            border-radius: 10px;
+            font-size: 15px;
+            background: rgba(30, 40, 55, 0.9);
+            color: #ffffff;
+            transition: all 0.3s;
+            outline: none;
+        }
+
+        input::placeholder,
+        select option:first-child {
+            color: #7f8c8d;
+        }
+
+        input:focus,
+        select:focus {
+            background: rgba(40, 50, 65, 1);
+            box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.3);
+        }
+
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='%2364b5f6' d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 20px center;
+            padding-right: 50px;
+        }
+
+        select option {
+            background: #2c3e50;
+            color: #ffffff;
+            padding: 12px;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #9b59b6, #3498db);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 8px;
+            box-shadow: 0 4px 15px rgba(155, 89, 182, 0.4);
+        }
+
+        button[type="submit"]:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(155, 89, 182, 0.6);
+        }
+
+        button[type="submit"]:disabled {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            opacity: 0.8;
+        }
+
+        .form-disabled {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .form-disabled input,
+        .form-disabled select {
+            background: rgba(30, 40, 55, 0.6);
+            border-color: #5d6d7e;
+            color: #a6a6a6;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 12px;
+            margin: 12px 0;
+            background: rgba(52, 152, 219, 0.2);
+            border-radius: 10px;
+            color: #64b5f6;
+            font-weight: 500;
+            border: 1px solid rgba(100, 181, 246, 0.3);
+        }
+
+        .loading.show {
+            display: block;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .message {
+            display: none;
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 10px;
+            font-weight: 500;
+            text-align: center;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message.success {
+            background: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+            border: 1px solid rgba(46, 204, 113, 0.5);
+        }
+
+        .message.error {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.5);
+        }
+
+        .limit-message {
+            background: rgba(243, 156, 18, 0.2);
+            color: #f39c12;
+            border: 1px solid rgba(243, 156, 18, 0.5);
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .completed-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        /* ==================== ESTILOS PARA LA TABLA RESUMEN ==================== */
+        .resumen-section {
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(30, 40, 55, 0.6);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .resumen-section h3 {
+            color: #64b5f6;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .resumen-section h3::before {
+            content: '📊';
+            font-size: 18px;
+        }
+
+        .tabla-resumen {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .tabla-resumen th {
+            background: rgba(52, 152, 219, 0.3);
+            color: #64b5f6;
+            padding: 10px 8px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid rgba(100, 181, 246, 0.3);
+        }
+
+        .tabla-resumen td {
+            padding: 10px 8px;
+            color: #ecf0f1;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tabla-resumen tr:last-child td {
+            border-bottom: none;
+        }
+
+        .tabla-resumen tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .sin-registros {
+            text-align: center;
+            color: #7f8c8d;
+            padding: 20px;
+            font-style: italic;
+        }
+
+        /* ==================== BOTÓN MODIFICADO - SOLO REDIRECCIÓN ==================== */
+        .view-all-button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+            text-decoration: none;
+        }
+
+        .view-all-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(52, 152, 219, 0.4);
+            background: linear-gradient(135deg, #2980b9, #2471a3);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .tabla-resumen {
+                font-size: 11px;
+            }
+
+            .tabla-resumen th,
+            .tabla-resumen td {
+                padding: 8px 5px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+                border-radius: 15px;
+            }
+
+            .header h1 {
+                font-size: 26px;
+            }
+
+            input, select, button {
+                padding: 14px 16px;
+                font-size: 15px;
+            }
+
+            .tabla-resumen {
+                font-size: 11px;
+            }
+
+            .tabla-resumen th,
+            .tabla-resumen td {
+                padding: 6px 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="connection-status">
+                <div class="status-dot" id="statusDot"></div>
+                <span class="status-text" id="statusText">Verificando...</span>
+            </div>
+            <h1>Sistema de Registro</h1>
+            <p>Secretaría de Iglesias MBON</p>
+        </div>
+        
+        <!-- Mensaje de límite (solo se muestra si ya está registrado) -->
+        <div class="limit-message" id="limitMessage" style="display: none;">
+            ⚠️ <strong>LÍMITE DE REGISTRO ALCANZADO</strong><br>
+            <small>Solo puedes realizar un registro por dispositivo.</small>
+        </div>
+        
+        <form id="attendanceForm">
+            <div class="form-group">
+                <label>
+                    <span class="icon">👤</span>
+                    Nombre Completo
+                </label>
+                <input 
+                    type="text" 
+                    name="nombre" 
+                    placeholder="Ej: Juan Pérez"
+                    required
+                >
+            </div>
+            
+            <div class="form-group">
+                <label>
+                    <span class="icon">📍</span>
+                    Distrito
+                </label>
+                <input 
+                    type="text" 
+                    name="distrito" 
+                    placeholder="Ej: Distrito Norte"
+                    required
+                >
+            </div>
+            
+            <div class="form-group">
+                <label>
+                    <span class="icon">⛪</span>
+                    Iglesia
+                </label>
+                <input 
+                    type="text" 
+                    name="iglesia" 
+                    placeholder="Ej: Iglesia Central"
+                    required
+                >
+            </div>
+            
+            <div class="form-group">
+                <label>
+                    <span class="icon">📱</span>
+                    Celular
+                </label>
+                <input 
+                    type="tel" 
+                    name="celular" 
+                    placeholder="Ej: 1234567890"
+                    pattern="[0-9]{7,15}"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label>
+                    <span class="icon">📧</span>
+                    Correo Electrónico
+                </label>
+                <input 
+                    type="email" 
+                    name="correo" 
+                    placeholder="ejemplo@correo.com"
+                    required
+                >
+            </div>
+            
+            <div class="form-group">
+                <label>
+                    <span class="icon">🎯</span>
+                    Cargo
+                </label>
+                <select name="cargo" required>
+                    <option value="">Selecciona un cargo</option>
+                    <option value="Secretario(a)">Secretario(a)</option>
+                    <option value="Secretario(a) Asociado(a)">Secretario(a) Asociado(a)</option>
+                    <option value="Secretario(a) Nuevo">Secretario(a) Nuevo</option>
+                    <option value="Secretario(a) Asociado(a) Nuevo">Secretario(a) Asociado(a) Nuevo</option>
+                    <option value="Pastor">Pastor</option>
+                    <option value="Visita">Visita</option>
+                </select>
+            </div>
+            
+            <button type="submit" id="submitBtn">
+                Registrar Asistencia
+            </button>
+        </form>
+        
+        <!-- Sección de Resumen con Botón Fijo -->
+        <div class="resumen-section">
+            <h3>Tu Registro</h3>
+            <div id="resumenContent">
+                <div class="sin-registros" id="sinRegistro">
+                    📝 Aún no has completado tu registro
+                </div>
+                <table class="tabla-resumen" id="tablaResumen" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Distrito</th>
+                            <th>Iglesia</th>
+                            <th>Cargo</th>
+                            <th>Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resumenBody">
+                        <!-- Datos se llenan dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Botón MODIFICADO - Solo redirección a datos.html -->
+            <a href="datos.html" class="view-all-button" id="viewAllButton">
+                👥 Ver Todos los Registros
+            </a>
+        </div>
+        
+        <div class="loading" id="loadingIndicator">
+            ⏳ Enviando datos...
+        </div>
+        
+        <div class="message" id="message"></div>
+    </div>
+
+    <script>
+        // ⚠️ CONFIGURACIÓN - REEMPLAZA CON TU URL
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzTaLLm66buVm_ZTfZMWrIbjU23Yb3SScmKldWmYloTwtmAHnPhMljNV0KIjXOaGDF6/exec';
+        
+        // ==================== SISTEMA DE 1 REGISTRO POR DISPOSITIVO ====================
+        const REGISTRO_KEY = 'mbon_registro_evento_2024';
+
+        // Elementos del DOM
+        const form = document.getElementById('attendanceForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const loading = document.getElementById('loadingIndicator');
+        const message = document.getElementById('message');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const tablaResumen = document.getElementById('tablaResumen');
+        const resumenBody = document.getElementById('resumenBody');
+        const sinRegistro = document.getElementById('sinRegistro');
+        const limitMessage = document.getElementById('limitMessage');
+
+        // Variables para el estado de conexión
+        let connectionStatus = 'checking';
+        let checkInterval;
+
+        // ==================== FUNCIONES DE REGISTRO ÚNICO ====================
+
+        /**
+         * Verificar si ya se registró desde este dispositivo
+         */
+        function yaSeRegistro() {
+            return localStorage.getItem(REGISTRO_KEY) === 'true';
+        }
+
+        /**
+         * Guardar registro exitoso en storage
+         */
+        function guardarRegistroExitoso(datos) {
+            const timestamp = new Date().toISOString();
+            
+            localStorage.setItem(REGISTRO_KEY, 'true');
+            localStorage.setItem(REGISTRO_KEY + '_fecha', timestamp);
+            localStorage.setItem(REGISTRO_KEY + '_datos', JSON.stringify({
+                ...datos,
+                fecha: timestamp,
+                dispositivo: navigator.userAgent.substring(0, 100)
+            }));
+            
+            // Actualizar resumen local
+            actualizarResumenLocal(datos, timestamp);
+        }
+
+        /**
+         * Actualizar la tabla de resumen con los datos locales
+         */
+        function actualizarResumenLocal(datos, fecha) {
+            const fechaLegible = new Date(fecha).toLocaleDateString('es-ES', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            sinRegistro.style.display = 'none';
+            tablaResumen.style.display = 'table';
+            
+            resumenBody.innerHTML = `
+                <tr>
+                    <td>${datos.nombre}</td>
+                    <td>${datos.distrito}</td>
+                    <td>${datos.iglesia}</td>
+                    <td>${datos.cargo}</td>
+                    <td>${fechaLegible}</td>
+                </tr>
+            `;
+        }
+
+        /**
+         * Cargar resumen desde localStorage
+         */
+        function cargarResumenLocal() {
+            if (yaSeRegistro()) {
+                const datosGuardados = localStorage.getItem(REGISTRO_KEY + '_datos');
+                if (datosGuardados) {
+                    const datos = JSON.parse(datosGuardados);
+                    actualizarResumenLocal(datos, datos.fecha);
+                }
+            }
+        }
+
+        /**
+         * Deshabilitar formulario y mostrar mensaje de límite
+         */
+        function mostrarMensajeLimite() {
+            if (yaSeRegistro()) {
+                // Mostrar mensaje de límite
+                limitMessage.style.display = 'block';
+                
+                // Deshabilitar formulario
+                form.classList.add('form-disabled');
+                const elementos = form.querySelectorAll('input, select');
+                elementos.forEach(elemento => {
+                    elemento.disabled = true;
+                });
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '✅ Registro Completado';
+                submitBtn.style.background = 'linear-gradient(135deg, #27ae60, #2ecc71)';
+                
+                showMessage(
+                    `🎉 <strong>¡Registro Completado!</strong><br>
+                    <small>Tu información ha sido registrada exitosamente.</small><br>
+                    <small><strong>Nota:</strong> Solo se permite un registro por dispositivo.</small>`, 
+                    'success'
+                );
+                
+                return true;
+            }
+            return false;
+        }
+
+        // ==================== FUNCIONES DE CONEXIÓN ====================
+
+        async function checkConnection() {
+            if (APPS_SCRIPT_URL === 'TU_URL_AQUI') {
+                updateConnectionStatus('disconnected', 'Sin configurar');
+                return;
+            }
+
+            try {
+                statusDot.className = 'status-dot checking';
+                statusText.textContent = 'Verificando...';
+
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'GET',
+                    mode: 'no-cors',
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeoutId);
+                updateConnectionStatus('connected', 'Conectado');
+                
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    updateConnectionStatus('disconnected', 'Tiempo agotado');
+                } else {
+                    updateConnectionStatus('disconnected', 'Sin conexión');
+                }
+            }
+        }
+
+        function updateConnectionStatus(status, text) {
+            connectionStatus = status;
+            statusDot.className = `status-dot ${status}`;
+            statusText.textContent = text;
+        }
+
+        function startConnectionMonitoring() {
+            checkConnection();
+            checkInterval = setInterval(checkConnection, 30000);
+        }
+
+        // ==================== MANEJO DEL FORMULARIO ====================
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (yaSeRegistro()) {
+                showMessage('⚠️ <strong>LÍMITE DE REGISTRO ALCANZADO</strong><br><small>Solo puedes realizar un registro por dispositivo.</small>', 'error');
+                mostrarMensajeLimite();
+                return;
+            }
+            
+            if (connectionStatus === 'disconnected') {
+                showMessage('⚠️ Sin conexión al servidor.', 'error');
+                return;
+            }
+            
+            if (!form.checkValidity()) {
+                showMessage('Por favor, completa todos los campos obligatorios', 'error');
+                return;
+            }
+
+            setLoadingState(true);
+
+            try {
+                const formData = new FormData(form);
+                const datos = {};
+                formData.forEach((value, key) => {
+                    datos[key] = value;
+                });
+                
+                console.log('📤 Enviando datos:', datos);
+                
+                const params = new URLSearchParams(datos);
+                const urlConParams = `${APPS_SCRIPT_URL}?${params.toString()}`;
+                
+                const response = await fetch(urlConParams, {
+                    method: 'GET',
+                    mode: 'no-cors',
+                    redirect: 'follow'
+                });
+
+                console.log('✅ Datos enviados correctamente');
+                
+                guardarRegistroExitoso(datos);
+                updateConnectionStatus('connected', 'Conectado');
+                
+                showMessage('✅ ¡Registro completado exitosamente!<br><small>Tu información ha sido guardada correctamente.</small>', 'success');
+                
+                setTimeout(() => {
+                    mostrarMensajeLimite();
+                }, 2000);
+                
+                message.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            } catch (error) {
+                console.error('❌ Error:', error);
+                updateConnectionStatus('disconnected', 'Error de envío');
+                showMessage('❌ Error: ' + error.message, 'error');
+            } finally {
+                setLoadingState(false);
+                setTimeout(checkConnection, 2000);
+            }
+        });
+
+        function setLoadingState(isLoading) {
+            submitBtn.disabled = isLoading;
+            if (isLoading) {
+                loading.classList.add('show');
+                message.classList.remove('show');
+                submitBtn.textContent = '⏳ Enviando...';
+            } else {
+                loading.classList.remove('show');
+                submitBtn.textContent = 'Registrar Asistencia';
+            }
+        }
+
+        function showMessage(text, type) {
+            message.innerHTML = text;
+            message.className = `message ${type} show`;
+            if (type === 'success') {
+                setTimeout(() => {
+                    message.classList.remove('show');
+                }, 5000);
+            }
+        }
+
+        // ==================== INICIALIZACIÓN ====================
+
+        document.addEventListener('DOMContentLoaded', function() {
+            startConnectionMonitoring();
+            cargarResumenLocal();
+            setTimeout(() => {
+                mostrarMensajeLimite();
+            }, 1000);
+        });
+
+        // Validación del celular
+        document.querySelector('input[name="celular"]').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+
+        // Prevenir envío con Enter
+        form.querySelectorAll('input').forEach(input => {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
