@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>Directorio de Iglesias - MBON</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
@@ -484,9 +484,14 @@
             border-top: 1px solid #e0e0e0;
         }
 
+        /* Estilos para tablets */
         @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
             .container {
-                padding: 20px;
+                padding: 15px;
             }
 
             .header h1 {
@@ -540,36 +545,179 @@
             .btn-pdf {
                 max-width: 100%;
             }
+
+            .stats-section,
+            .search-section,
+            .table-section {
+                padding: 15px;
+            }
         }
 
+        /* Estilos específicos para móviles - MÁRGENES ELIMINADOS */
         @media (max-width: 480px) {
+            body {
+                padding: 0; /* Eliminar padding del body en móviles */
+                background: #ffffff; /* Fondo blanco para mejor integración */
+            }
+
             .container {
-                padding: 15px;
+                padding: 10px 8px; /* Mínimo padding, solo para evitar que el texto toque los bordes */
+                border-radius: 0; /* Sin bordes redondeados en móviles */
+                box-shadow: none; /* Sin sombra en móviles */
+                border: none; /* Sin borde en móviles */
+                max-width: 100%;
+            }
+
+            .header {
+                margin-bottom: 15px;
+                padding-bottom: 10px;
             }
 
             .header h1 {
-                font-size: 22px;
+                font-size: 20px;
+                gap: 10px;
+            }
+
+            .header h1::before {
+                height: 24px;
+            }
+
+            .header p {
+                font-size: 13px;
+                margin-left: 15px;
+            }
+
+            .connection-status {
+                position: relative;
+                top: auto;
+                right: auto;
+                margin: 0 0 10px 0;
+                width: 100%;
+                justify-content: center;
+                background: #f0f2f5;
+            }
+
+            /* Secciones con padding mínimo */
+            .stats-section {
+                margin: 10px 0;
+                padding: 12px 8px;
+            }
+
+            .stats-section h3 {
+                font-size: 14px;
+                margin-bottom: 10px;
             }
 
             .stats-grid {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 8px;
+                gap: 6px;
             }
 
             .stat-card {
-                padding: 15px 8px;
+                padding: 10px 5px;
             }
 
             .stat-number {
-                font-size: 20px;
+                font-size: 18px;
+            }
+
+            .stat-label {
+                font-size: 10px;
+            }
+
+            .search-section {
+                margin: 10px 0;
+                padding: 12px 8px;
+            }
+
+            .search-section h3 {
+                font-size: 14px;
+                margin-bottom: 10px;
+            }
+
+            .search-container {
+                gap: 8px;
+            }
+
+            .search-input {
+                padding: 10px 12px;
+                font-size: 14px;
+            }
+
+            .search-clear {
+                padding: 10px 12px;
+                font-size: 13px;
+            }
+
+            .search-results {
+                font-size: 12px;
+                margin-top: 8px;
             }
 
             .controls {
-                flex-direction: column;
+                margin: 10px 0;
             }
 
             .btn {
-                width: 100%;
+                padding: 10px 16px;
+                font-size: 13px;
+                min-width: 120px;
+            }
+
+            .table-section {
+                margin: 10px 0 15px 0;
+                padding: 12px 0; /* Eliminar padding horizontal en móviles */
+                border-left: none;
+                border-right: none;
+                border-radius: 0; /* Sin bordes redondeados en los laterales */
+            }
+
+            .table-section h3 {
+                font-size: 16px;
+                margin-bottom: 12px;
+                padding: 0 8px; /* Añadir padding solo al título */
+            }
+
+            .table-container {
+                border-left: none;
+                border-right: none;
+                border-radius: 0;
+                margin: 0 -8px; /* Compensar el padding del container para usar todo el ancho */
+                width: calc(100% + 16px); /* Hacer que la tabla ocupe todo el ancho disponible */
+            }
+
+            .registros-table {
+                font-size: 12px;
+            }
+
+            .registros-table th {
+                padding: 10px 6px;
+                font-size: 11px;
+            }
+
+            .registros-table td {
+                padding: 8px 6px;
+                font-size: 11px;
+            }
+
+            .pdf-container {
+                margin-top: 15px;
+                padding-top: 15px;
+            }
+
+            .btn-pdf {
+                max-width: 100%;
+                margin-top: 15px;
+            }
+
+            .loading, .message {
+                margin: 10px 0;
+                padding: 12px;
+                font-size: 13px;
+            }
+
+            .sin-registros {
+                padding: 25px 10px;
+                font-size: 13px;
             }
         }
 
@@ -1070,4 +1218,3 @@
     </script>
 </body>
 </html>
-
