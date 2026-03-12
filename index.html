@@ -677,7 +677,7 @@
     </div>
 
     <script>
-        const URL_VISUALIZADOR = 'https://script.google.com/macros/s/AKfycbwdnyq9Lsx9KYtG9dsbBBH8ByLbnokmDxW_bqfQRrHonVqfAb_UeJa7o0xYelLq9t8ppg/exec';
+        const URL_VISUALIZADOR = 'https://script.google.com/macros/s/AKfycby9pAQEqIRZOg5MVdoA806ZdEdPPne6v2SmNXzHBH30NHRHAuiSEQzQlAzl1kV6Krbesg/exec';
         
         const registrosBody = document.getElementById('registrosBody');
         const loadingIndicator = document.getElementById('loadingIndicator');
@@ -696,6 +696,42 @@
 
         let registrosActuales = [];
         let registrosFiltrados = [];
+        let terminoBusquedaActual = '';
+
+        const meses = [
+            'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+            'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+        ];
+
+        function corregirFechaISO(texto) {
+            if (!texto) return texto;
+            
+            // Patrón para detectar fechas ISO: YYYY-MM-DDTHH:MM:SS.sssZ
+            const patronISO = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+            
+            if (typeof texto === 'string' && patronISO.test(texto)) {
+                try {
+                    const fecha = new Date(texto);
+                    if (!isNaN(fecha.getTime())) {
+                        const dia = fecha.getUTCDate();
+                        const mes = fecha.getUTCMonth(); // 0-11
+                        
+                        // Casos especiales: nombres de lugares
+                        if (dia === 12 && mes === 9) return `12 de Octubre`; // Octubre es mes 9
+                        if (dia === 16 && mes === 6) return `16 de Julio`;    // Julio es mes 6
+                        if (dia === 16 && mes === 1) return `16 de Febrero`;  // Febrero es mes 1
+                        if (dia === 17 && mes === 1) return `17 de Febrero`;  // Febrero es mes 1
+                        if (dia === 18 && mes === 11) return `18 de Diciembre`; // Diciembre es mes 11
+                        
+                        return `${dia} de ${meses[mes]}`;
+                    }
+                } catch (e) {
+                    return texto;
+                }
+            }
+            
+            return texto;
+        }
 
         async function cargarRegistros() {
             try {
@@ -712,9 +748,16 @@
                 const resultado = await response.json();
                 
                 if (resultado.status === 'success') {
-                    registrosActuales = resultado.data;
-                    registrosFiltrados = [...registrosActuales];
-                    mostrarRegistros(registrosActuales);
+                    registrosActuales = resultado.data.map(registro => ({
+                        distrito: corregirFechaISO(registro.distrito),
+                        iglesia: corregirFechaISO(registro.iglesia),
+                        nombre: registro.nombre,
+                        celular: registro.celular
+                    }));
+                    
+                    // Mantener el filtro actual después de actualizar
+                    aplicarFiltro();
+                    
                     actualizarEstadisticas(registrosActuales);
                     actualizarEstadoConexion('connected', `${resultado.total} registros`);
                     mostrarMensaje(`✅ Directorio actualizado correctamente`, 'success');
@@ -725,8 +768,6 @@
                         btnPDF.disabled = true;
                     }
                     
-                    actualizarContadoresBusqueda();
-                    searchInput.value = '';
                 } else {
                     throw new Error(resultado.message);
                 }
@@ -744,6 +785,21 @@
             }
         }
 
+        function aplicarFiltro() {
+            const termino = terminoBusquedaActual.toLowerCase();
+            
+            if (termino === '') {
+                registrosFiltrados = [...registrosActuales];
+            } else {
+                registrosFiltrados = registrosActuales.filter(registro => 
+                    registro.iglesia && registro.iglesia.toLowerCase().includes(termino)
+                );
+            }
+            
+            mostrarRegistros(registrosFiltrados);
+            actualizarContadoresBusqueda();
+        }
+
         function mostrarRegistros(registros) {
             if (!registros || registros.length === 0) {
                 sinRegistros.style.display = 'block';
@@ -756,17 +812,21 @@
 
             sinRegistros.style.display = 'none';
             
-            registrosBody.innerHTML = registros.map((registro, index) => `
+            registrosBody.innerHTML = registros.map((registro, index) => {
+                const distritoFormateado = escapeHtml(registro.distrito || 'Sin distrito');
+                const iglesiaFormateada = escapeHtml(registro.iglesia || 'Sin iglesia');
+                
+                return `
                 <tr>
                     <td><strong>${index + 1}</strong></td>
-                    <td>${escapeHtml(registro.distrito || 'Sin distrito')}</td>
-                    <td class="${searchInput.value.trim() !== '' && registro.iglesia && registro.iglesia.toLowerCase().includes(searchInput.value.trim().toLowerCase()) ? 'highlight' : ''}">
-                        ${destacarCoincidencia(escapeHtml(registro.iglesia || 'Sin iglesia'), searchInput.value)}
+                    <td>${distritoFormateado}</td>
+                    <td class="${terminoBusquedaActual !== '' && registro.iglesia && registro.iglesia.toLowerCase().includes(terminoBusquedaActual.toLowerCase()) ? 'highlight' : ''}">
+                        ${destacarCoincidencia(iglesiaFormateada, terminoBusquedaActual)}
                     </td>
                     <td><strong>${escapeHtml(registro.nombre || 'Sin nombre')}</strong></td>
                     <td>${escapeHtml(registro.celular || 'Sin contacto')}</td>
                 </tr>
-            `).join('');
+            `}).join('');
             
             actualizarContadoresBusqueda();
         }
@@ -783,20 +843,11 @@
         }
 
         function filtrarPorIglesia() {
-            const termino = searchInput.value.trim().toLowerCase();
+            terminoBusquedaActual = searchInput.value.trim();
+            aplicarFiltro();
             
-            if (termino === '') {
-                registrosFiltrados = [...registrosActuales];
-            } else {
-                registrosFiltrados = registrosActuales.filter(registro => 
-                    registro.iglesia && registro.iglesia.toLowerCase().includes(termino)
-                );
-            }
-            
-            mostrarRegistros(registrosFiltrados);
-            
-            if (termino !== '') {
-                searchTermDisplay.textContent = `Filtro activo: "${termino}"`;
+            if (terminoBusquedaActual !== '') {
+                searchTermDisplay.textContent = `Filtro activo: "${terminoBusquedaActual}"`;
             } else {
                 searchTermDisplay.textContent = '';
             }
@@ -804,9 +855,11 @@
 
         function limpiarBusqueda() {
             searchInput.value = '';
+            terminoBusquedaActual = '';
             registrosFiltrados = [...registrosActuales];
             mostrarRegistros(registrosFiltrados);
             searchInput.focus();
+            searchTermDisplay.textContent = '';
         }
 
         function actualizarContadoresBusqueda() {
@@ -849,15 +902,15 @@
                 doc.text('Secretaría de Iglesias', 40, 60);
                 doc.text(`Generado: ${fechaActual}`, 40, 75);
                 
-                if (searchInput.value.trim() !== '') {
+                if (terminoBusquedaActual !== '') {
                     doc.setFontSize(11);
                     doc.setTextColor(26, 115, 232);
-                    doc.text(`Filtro aplicado: "${searchInput.value}"`, 40, 90);
+                    doc.text(`Filtro aplicado: "${terminoBusquedaActual}"`, 40, 90);
                 }
                 
                 doc.setFontSize(12);
                 doc.setTextColor(52, 168, 83);
-                doc.text('RESUMEN ESTADÍSTICO:', 40, searchInput.value.trim() !== '' ? 105 : 95);
+                doc.text('RESUMEN ESTADÍSTICO:', 40, terminoBusquedaActual !== '' ? 105 : 95);
                 
                 doc.setFontSize(11);
                 doc.setTextColor(60, 64, 67);
@@ -868,7 +921,7 @@
                     `• Mostrando: ${registrosFiltrados.length}`
                 ];
                 
-                const startY = searchInput.value.trim() !== '' ? 120 : 110;
+                const startY = terminoBusquedaActual !== '' ? 120 : 110;
                 estadisticas.forEach((est, i) => {
                     doc.text(est, 40 + (i % 4) * 145, startY + Math.floor(i / 4) * 18);
                 });
@@ -883,7 +936,7 @@
                     registro.celular || 'Sin contacto'
                 ]);
 
-                const tableStartY = searchInput.value.trim() !== '' ? 150 : 140;
+                const tableStartY = terminoBusquedaActual !== '' ? 150 : 140;
                 
                 doc.autoTable({
                     head: headers,
@@ -929,8 +982,8 @@
                     );
                 }
 
-                const nombreArchivo = searchInput.value.trim() !== '' 
-                    ? `directorio-${searchInput.value.trim().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`
+                const nombreArchivo = terminoBusquedaActual !== '' 
+                    ? `directorio-${terminoBusquedaActual.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`
                     : `directorio-mbon-${new Date().toISOString().split('T')[0]}.pdf`;
                 doc.save(nombreArchivo);
 
@@ -1011,8 +1064,10 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             cargarRegistros();
+            // Actualizar automáticamente cada 30 segundos
             setInterval(cargarRegistros, 30000);
         });
     </script>
 </body>
 </html>
+
